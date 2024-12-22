@@ -48,6 +48,98 @@ class ItemTest(unittest.TestCase):
         with self.assertRaises(NotImplementedError):
             item.update()  
 
+class GildedRoseTest(unittest.TestCase):
+    def test_update_quality(self):
+        # Test to ensure update_quality method calls update on correct subclasses
+        
+        # Mock Item list with different types of items
+        items = [
+            Item("Aged Brie", 5, 10),
+            Item("Backstage passes to a TAFKAL80ETC concert", 5, 10),
+            Item("Sulfuras, Hand of Ragnaros", 0, 80),
+            Item("Regular Item", 5, 10)
+        ]
+        
+        gilded_rose = GildedRose(items)
+        
+        # Run the update
+        gilded_rose.update_quality()
+
+        # Test for Aged Brie: It should have increased in quality
+        self.assertEqual(items[0].quality, 11)
+        
+        # Test for Backstage Pass: It should have increased in quality
+        self.assertEqual(items[1].quality, 13)
+        
+        # Test for Sulfuras: Quality should not have changed
+        self.assertEqual(items[2].quality, 80)
+        
+        # Test for Regular Item: Quality should have decreased
+        self.assertEqual(items[3].quality, 9)
+
+    def test_update_quality_multiple_times(self):
+        items = [
+            Item("Aged Brie", 2, 10),
+            Item("Backstage passes to a TAFKAL80ETC concert", 5, 10),
+            Item("Sulfuras, Hand of Ragnaros", 0, 80),
+            Item("Regular Item", 5, 10)
+        ]
+        
+        gilded_rose = GildedRose(items)
+        
+        # Run update multiple times
+        gilded_rose.update_quality()  # First update
+        gilded_rose.update_quality()  # Second update
+        gilded_rose.update_quality()  # Third update
+
+        # Test for Aged Brie: It should have increased in quality over time
+        self.assertEqual(items[0].quality, 14)
+        
+        # Test for Backstage Pass: It should have increased in quality over time
+        self.assertEqual(items[1].quality, 19)
+        
+        # Test for Sulfuras: Quality should remain constant
+        self.assertEqual(items[2].quality, 80)
+        
+        # Test for Regular Item: Quality should have decreased faster
+        self.assertEqual(items[3].quality, 7)
+
+    def test_update_quality_max_min_values(self):
+        items = [
+            Item("Aged Brie", 5, 50),  # Quality can't go above 50
+            Item("Regular Item", 5, 0),  # Quality can't go below 0
+            Item("Backstage passes to a TAFKAL80ETC concert", 5, 49),  # Max quality for Backstage is 50
+        ]
+        
+        gilded_rose = GildedRose(items)
+        
+        # Run update
+        gilded_rose.update_quality()
+        
+        self.assertEqual(items[0].quality, 50)  # Aged Brie should not increase above 50
+        self.assertEqual(items[1].quality, 0)  # Regular item should not decrease below 0
+        self.assertEqual(items[2].quality, 50)  # Backstage passes should not exceed 50
+
+    def test_update_quality_expired_items(self):
+        items = [
+            Item("Regular Item", 0, 10),
+            Item("Aged Brie", 0, 10),
+            Item("Backstage passes to a TAFKAL80ETC concert", 0, 10),
+        ]
+        
+        gilded_rose = GildedRose(items)
+        
+        # Run update
+        gilded_rose.update_quality()
+
+        # Regular item should degrade by 2 after expiry
+        self.assertEqual(items[0].quality, 8)
+        
+        # Aged Brie should increase by 2 after expiry
+        self.assertEqual(items[1].quality, 12)
+        
+        # Backstage passes should have its quality drop to 0 after expiry
+        self.assertEqual(items[2].quality, 0)
         
 if __name__ == '__main__':
     unittest.main()
