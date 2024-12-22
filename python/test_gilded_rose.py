@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import unittest
 
-from gilded_rose import Item, GildedRose
+from gilded_rose import Item, GildedRose, AgedBrie, BackstagePass, Sulfuras, RegularItem
 
 
 class ItemTest(unittest.TestCase):
@@ -46,7 +46,69 @@ class ItemTest(unittest.TestCase):
     def test_update_not_implemented(self):
         item = Item("Test Item", 10, 10)
         with self.assertRaises(NotImplementedError):
-            item.update()  
+            item.update()
+
+class AgedBrieTest(unittest.TestCase):
+    def test_update(self):
+        item = AgedBrie("Aged Brie", 5, 10)
+        item.update()
+        self.assertEqual(item.sell_in, 4)
+        self.assertEqual(item.quality, 11)
+
+    def test_update_after_expiry(self):
+        item = AgedBrie("Aged Brie", 0, 10)
+        item.update()
+        self.assertEqual(item.sell_in, -1)
+        self.assertEqual(item.quality, 12)
+
+
+class BackstagePassTest(unittest.TestCase):
+    def test_update(self):
+        item = BackstagePass("Backstage passes to a TAFKAL80ETC concert", 15, 10)
+        item.update()
+        self.assertEqual(item.sell_in, 14)
+        self.assertEqual(item.quality, 11)
+
+    def test_update_close_to_event(self):
+        item = BackstagePass("Backstage passes to a TAFKAL80ETC concert", 10, 10)
+        item.update()
+        self.assertEqual(item.sell_in, 9)
+        self.assertEqual(item.quality, 12)
+
+    def test_update_very_close_to_event(self):
+        item = BackstagePass("Backstage passes to a TAFKAL80ETC concert", 5, 10)
+        item.update()
+        self.assertEqual(item.sell_in, 4)
+        self.assertEqual(item.quality, 13)
+
+    def test_update_expired(self):
+        item = BackstagePass("Backstage passes to a TAFKAL80ETC concert", 0, 10)
+        item.update()
+        self.assertEqual(item.sell_in, -1)
+        self.assertEqual(item.quality, 0)
+
+
+class SulfurasTest(unittest.TestCase):
+    def test_update(self):
+        item = Sulfuras("Sulfuras, Hand of Ragnaros", 10, 80)
+        item.update()  # Sulfuras should not change
+        self.assertEqual(item.sell_in, 10)
+        self.assertEqual(item.quality, 80)
+
+
+class RegularItemTest(unittest.TestCase):
+    def test_update(self):
+        item = RegularItem("Regular Item", 5, 10)
+        item.update()
+        self.assertEqual(item.sell_in, 4)
+        self.assertEqual(item.quality, 9)
+
+    def test_update_after_expiry(self):
+        item = RegularItem("Regular Item", 0, 10)
+        item.update()
+        self.assertEqual(item.sell_in, -1)
+        self.assertEqual(item.quality, 8)
+
 
 class GildedRoseTest(unittest.TestCase):
     def test_update_quality(self):

@@ -33,38 +33,65 @@ class Item:
         return self.sell_in < 0
 
 
-class GildedRose(object):
+class AgedBrie(Item):
+    # Aged Brie increases in quality over time, and more after expiration.
+    def update(self):
+        self.increase_quality()
+        self.decrease_sell_in()
+        if self.is_expired():
+            self.increase_quality()
 
+
+class BackstagePass(Item):
+    # Backstage passes increase in quality as the event approaches,
+    # with additional increases when sell_in is below 10 and 5.
+    # Quality drops to 0 after expiration.
+    def update(self):
+        self.increase_quality()
+        if self.sell_in < 11:
+            self.increase_quality()
+        if self.sell_in < 6:
+            self.increase_quality()
+        self.decrease_sell_in()
+        if self.is_expired():
+            self.quality = 0
+
+
+class Sulfuras(Item):
+    # Sulfuras is a legendary item whose quality and sell_in never change.
+    def update(self):
+        pass  # Sulfuras doesn't change
+
+
+class RegularItem(Item):
+    # Regular items decrease in quality over time, and decrease faster after expiration.
+    def update(self):
+        self.decrease_quality()
+        self.decrease_sell_in()
+        if self.is_expired():
+            self.decrease_quality()
+
+
+class GildedRose:
     def __init__(self, items):
         self.items = items
 
     def update_quality(self):
+        # Update the quality of all items in the shop.
         for item in self.items:
-            if item.name != "Aged Brie" and item.name != "Backstage passes to a TAFKAL80ETC concert":
-                if item.quality > 0:
-                    if item.name != "Sulfuras, Hand of Ragnaros":
-                        item.quality = item.quality - 1
+            # Dispatching logic: convert the item to its specific subclass
+            if "Aged Brie" in item.name:
+                specific_item = AgedBrie(item.name, item.sell_in, item.quality)
+            elif "Backstage" in item.name:
+                specific_item = BackstagePass(item.name, item.sell_in, item.quality)
+            elif "Sulfuras" in item.name:
+                specific_item = Sulfuras(item.name, item.sell_in, item.quality)
             else:
-                if item.quality < 50:
-                    item.quality = item.quality + 1
-                    if item.name == "Backstage passes to a TAFKAL80ETC concert":
-                        if item.sell_in < 11:
-                            if item.quality < 50:
-                                item.quality = item.quality + 1
-                        if item.sell_in < 6:
-                            if item.quality < 50:
-                                item.quality = item.quality + 1
-            if item.name != "Sulfuras, Hand of Ragnaros":
-                item.sell_in = item.sell_in - 1
-            if item.sell_in < 0:
-                if item.name != "Aged Brie":
-                    if item.name != "Backstage passes to a TAFKAL80ETC concert":
-                        if item.quality > 0:
-                            if item.name != "Sulfuras, Hand of Ragnaros":
-                                item.quality = item.quality - 1
-                    else:
-                        item.quality = item.quality - item.quality
-                else:
-                    if item.quality < 50:
-                        item.quality = item.quality + 1
+                specific_item = RegularItem(item.name, item.sell_in, item.quality)
 
+            # Now, update the item (which is of the appropriate subclass)
+            specific_item.update()
+
+            # Reflect the updated values in the original item
+            item.sell_in = specific_item.sell_in
+            item.quality = specific_item.quality
