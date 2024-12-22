@@ -75,21 +75,20 @@ class RegularItem(Item):
 class GildedRose:
     def __init__(self, items):
         self.items = items
+        self.item_types = {
+            "Aged Brie": AgedBrie,
+            "Backstage passes to a TAFKAL80ETC concert": BackstagePass,
+            "Sulfuras, Hand of Ragnaros": Sulfuras,
+        }
 
     def update_quality(self):
         # Update the quality of all items in the shop.
         for item in self.items:
-            # Dispatching logic: convert the item to its specific subclass
-            if "Aged Brie" in item.name:
-                specific_item = AgedBrie(item.name, item.sell_in, item.quality)
-            elif "Backstage" in item.name:
-                specific_item = BackstagePass(item.name, item.sell_in, item.quality)
-            elif "Sulfuras" in item.name:
-                specific_item = Sulfuras(item.name, item.sell_in, item.quality)
-            else:
-                specific_item = RegularItem(item.name, item.sell_in, item.quality)
+            # Dispatching logic: instantiate the correct item type using the dictionary
+            item_type = self.item_types.get(item.name, RegularItem)
+            specific_item = item_type(item.name, item.sell_in, item.quality)
 
-            # Now, update the item (which is of the appropriate subclass)
+            # Update the item
             specific_item.update()
 
             # Reflect the updated values in the original item

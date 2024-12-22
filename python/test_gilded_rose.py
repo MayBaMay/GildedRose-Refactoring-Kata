@@ -108,7 +108,7 @@ class RegularItemTest(unittest.TestCase):
         item.update()
         self.assertEqual(item.sell_in, -1)
         self.assertEqual(item.quality, 8)
-
+        
 
 class GildedRoseTest(unittest.TestCase):
     def test_update_quality(self):
